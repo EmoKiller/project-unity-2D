@@ -13,13 +13,14 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private float moveSpeed = 1.5f;
     [SerializeField] private float moveSpeedRunning = 3f;
     [SerializeField] private float gravity = 1f;
-    [SerializeField] private float jumpForce = 570f;
-    [SerializeField] private float smoothTime = 0.0167f;
-    [SerializeField] private float blendDamp = 0.0167f;
+    [SerializeField] private float jumpForce = 5500f;
+    [SerializeField] private float smoothTime = 0.01f;
+    [SerializeField] private float blendDamp = 0.025f;
+    
 
     [Header("Ground Check")]
     [SerializeField] private LayerMask groundLayerMask;
-    [SerializeField] private float groundCheckRadius = 0.05f;
+    [SerializeField] private float groundCheckRadius = 0.2f;
     
 
     [Header("Object Reference")]
@@ -51,7 +52,7 @@ public class PlatfromController : MonoBehaviour
         }
         else if(!onGround)
         {
-            horizontal = 0;
+            ani.SetBool("IsJump", true);
         }
         rb.AddForce(Vector2.down * gravity);
         Move();
@@ -64,10 +65,7 @@ public class PlatfromController : MonoBehaviour
         bool horizontalDown = horizontal != 0;
         if (horizontalDown)
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, horizontal < 0 ? 180 : 0, transform.eulerAngles.z);
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            targetVelocity = new Vector2(horizontal * moveSpeed * moveSpeedRunning, rb.velocity.y);
-        }
+        
         targetVelocity = new Vector2(horizontal * moveSpeed, rb.velocity.y);
         
         rb.velocity = Vector2.SmoothDamp(rb.velocity, targetVelocity, ref refVelocity, smoothTime);
@@ -80,22 +78,8 @@ public class PlatfromController : MonoBehaviour
         {
             rb.velocity = new Vector2(rb.velocity.x, 0);
             rb.AddForce(Vector2.up * jumpForce);
-            ani.SetBool("IsJump", true);
         }
         
-    }
-    private void Run()
-    {
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            ani.SetBool("IsRunning", true);
-
-        }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
-        {
-            ani.SetBool("IsRunning", false);
-        }
-
     }
 
     private void OnDrawGizmos()
