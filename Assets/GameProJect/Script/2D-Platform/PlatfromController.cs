@@ -8,9 +8,9 @@ public class PlatfromController : MonoBehaviour
     public float jumbForce = 450f;
     public float moveSpeed = 20f;
 
-    public float currentVelocity = 3f;
+    public float currentVelocity = 1.5f;
     public float maxVelocity = 1.5f;
-    public float mutiVelocity = 1.5f;
+    public float mutiVelocity = 3f;
 
     public Rigidbody2D rb = null;
     public Animator ani;
@@ -18,12 +18,13 @@ public class PlatfromController : MonoBehaviour
     
 
     public float horizontal = 0f;
-    private bool horizontalDown = false;
     private float eulerAngleY = 0f;
     private Vector3 movementPlatform;
 
+    private bool isMoving => horizontal != 0f;
     private bool onGround = false;
-    private bool isMoving => horizontal != 0;
+    private bool isJump = false;
+    
 
     private void Awake()
     {
@@ -40,73 +41,90 @@ public class PlatfromController : MonoBehaviour
         horizontal = Input.GetAxis("Horizontal");
         movementPlatform = new Vector3(horizontal, 0);
         RotationPlayer();
-
-
-        Jump();
+        
+        if (onGround == true && rb.velocity.x <= currentVelocity && rb.velocity.x >= -currentVelocity)
+        {
+            Walk();
+            ani.SetFloat("horizontalMove", horizontal);
+        }
         Run();
+        Jump();
+
         Attack();
+        SetAnimationCharacter();
     }
     private void FixedUpdate()
     {
-        Walk();
+        if (!isMoving)
+        {
+            ani.SetFloat("horizontalMove",0);
+        }
+        else
+        {
+            ani.SetFloat("horizontalMove", 0);
+        }
+        
+        
+    }
+    private void SetAnimationCharacter()
+    {
+        
     }
     private void Attack()
     {
         if (Input.GetKeyDown(KeyCode.J))
         {
+            ani.SetTrigger("Attack");
             
         }
-        else if((Input.GetKeyUp(KeyCode.J)))
-        {
-            
-        }
+        //else if ((Input.GetKeyUp(KeyCode.J)))
+        //{
+        //    ani.ResetTrigger("Attack");
+        //}
 
     }
     private void RotationPlayer()
     {
-        horizontalDown = horizontal != 0f;
         eulerAngleY = horizontal < 0 ? 180 : 0;
-        if (horizontalDown)
+        if (isMoving)
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, eulerAngleY, transform.eulerAngles.z);
     }
     
     private void Walk()
     {
-        if (rb.velocity.x <= currentVelocity && rb.velocity.x  >= -currentVelocity)
-        {
-            rb.AddForce(movementPlatform * moveSpeed * Time.deltaTime, ForceMode2D.Impulse);
-            
-
-        }
-        ani.SetFloat("horizontalMove", horizontal);
+        rb.AddForce(movementPlatform * moveSpeed * Time.deltaTime, ForceMode2D.Impulse);
     }
     
     private void Run()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            currentVelocity *= mutiVelocity;
-            ani.SetBool("isRunning",true);
+        //if (Input.GetKeyDown(KeyCode.LeftShift) && isJump == false && isMoving == true)
+        //{
+        //    currentVelocity *= mutiVelocity;
+        //    ani.SetBool("isRunning",true);
             
-        }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
+        //}
+        //if (Input.GetKeyUp(KeyCode.LeftShift))
+        //{
+        //    currentVelocity = maxVelocity;
+        //    ani.SetBool("isRunning", false);
+        //}
+        if (Input.GetKey(KeyCode.LeftShift))
         {
-            currentVelocity = maxVelocity;
-            ani.SetBool("isRunning", false);
+            if (isJump == false && isMoving == true)
+            {
+                currentVelocity *= mutiVelocity;
+                ani.SetBool("isRunning",true);
+            }
         }
 
     }
-    private void SlowDown()
-    {
-        currentVelocity = 1.5f;
-        Debug.Log("Slow Down");
-    }
     private void Jump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && onGround)
+        if (Input.GetKeyDown(KeyCode.Space) && onGround == true )
         {
             rb.AddForce(transform.up * jumbForce, ForceMode2D.Force);
             ani.SetBool("isJump", true);
+            isJump = true;
         }
         
     }
@@ -115,11 +133,7 @@ public class PlatfromController : MonoBehaviour
     {
         if (collision.collider.CompareTag("Ground") || collision.gameObject.layer == 6)
         {
-            rb.velocity = new Vector2(0.2f,0);
             onGround = true;
-            Debug.Log("OnGround");
-
-
         }
     }
     private void OnCollisionExit2D(Collision2D collision)
@@ -127,8 +141,6 @@ public class PlatfromController : MonoBehaviour
         if (collision.collider.CompareTag("Ground") || collision.gameObject.layer == 6)
         {
             onGround = false;
-            ani.SetBool("isJump", false);
-            Debug.Log("is jump");
         }
     }
 }
