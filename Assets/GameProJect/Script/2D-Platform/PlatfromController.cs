@@ -67,7 +67,6 @@ public class PlatfromController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             targetVelocity = new Vector2(horizontal * moveSpeed * moveSpeedRunning, rb.velocity.y);
-            Break;
         }
         targetVelocity = new Vector2(horizontal * moveSpeed, rb.velocity.y);
         
