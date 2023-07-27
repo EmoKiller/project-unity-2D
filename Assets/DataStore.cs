@@ -23,7 +23,7 @@ public class DataStore : MonoBehaviour
         //WritePlayerDataToJson();
         PlayerConfig playerData = GetPlayerDataFromJson();
         PlatfromController controller = GetComponent<PlatfromController>();
-        controller.moveSpeed = playerData.moveSpeed;
+        //controller.moveSpeed = playerData.moveSpeed;
     }
     private PlayerConfig GetPlayerDataFromJson()
     {

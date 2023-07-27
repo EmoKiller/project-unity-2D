@@ -1,146 +1,109 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlatfromController : MonoBehaviour
 {
-    public float jumbForce = 450f;
-    public float moveSpeed = 20f;
+    public float horizontal { get; private set; }
 
-    public float currentVelocity = 1.5f;
-    public float maxVelocity = 1.5f;
-    public float mutiVelocity = 3f;
+    [Header("Configuration Move")]
+    
+    [SerializeField] private float moveSpeed = 1.5f;
+    [SerializeField] private float moveSpeedRunning = 3f;
+    [SerializeField] private float gravity = 1f;
+    [SerializeField] private float jumpForce = 570f;
+    [SerializeField] private float smoothTime = 0.0167f;
+    [SerializeField] private float blendDamp = 0.0167f;
 
-    public Rigidbody2D rb = null;
-    public Animator ani;
-    //public Transform character;
+    [Header("Ground Check")]
+    [SerializeField] private LayerMask groundLayerMask;
+    [SerializeField] private float groundCheckRadius = 0.05f;
     
 
-    public float horizontal = 0f;
-    private float eulerAngleY = 0f;
-    private Vector3 movementPlatform;
+    [Header("Object Reference")]
+    [SerializeField] private Rigidbody2D rb = null;
+    [SerializeField] private Animator ani = null;
+    [SerializeField] private Transform groundCheckPoint = null;
 
-    private bool isMoving => horizontal != 0f;
-    private bool onGround = false;
-    private bool isJump = false;
+    [Header("Status")]
+    [SerializeField] private bool onGround = false;
     
 
+    private Vector2 refVelocity = Vector2.zero;
+    private Vector2 targetVelocity = Vector2.zero;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         ani = GameObject.FindWithTag("Player").GetComponent<Animator>();
     }
-    void Start()
+    private void Update()
     {
-
-    }
-
-    void Update()
-    {
-        horizontal = Input.GetAxis("Horizontal");
-        movementPlatform = new Vector3(horizontal, 0);
-        RotationPlayer();
         
-        if (onGround == true && rb.velocity.x <= currentVelocity && rb.velocity.x >= -currentVelocity)
-        {
-            Walk();
-            ani.SetFloat("horizontalMove", horizontal);
-        }
-        Run();
-        Jump();
-
-        Attack();
-        SetAnimationCharacter();
     }
     private void FixedUpdate()
     {
-        if (!isMoving)
+        onGround = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayerMask) != null;
+        if (onGround)
         {
-            ani.SetFloat("horizontalMove",0);
+            ani.SetBool("IsJump", false);
         }
-        else
+        else if(!onGround)
         {
-            ani.SetFloat("horizontalMove", 0);
+            horizontal = 0;
         }
-        
-        
-    }
-    private void SetAnimationCharacter()
-    {
-        
-    }
-    private void Attack()
-    {
-        if (Input.GetKeyDown(KeyCode.J))
-        {
-            ani.SetTrigger("Attack");
-            
-        }
-        //else if ((Input.GetKeyUp(KeyCode.J)))
-        //{
-        //    ani.ResetTrigger("Attack");
-        //}
-
-    }
-    private void RotationPlayer()
-    {
-        eulerAngleY = horizontal < 0 ? 180 : 0;
-        if (isMoving)
-            transform.eulerAngles = new Vector3(transform.eulerAngles.x, eulerAngleY, transform.eulerAngles.z);
+        rb.AddForce(Vector2.down * gravity);
+        Move();
+        Jump();
     }
     
-    private void Walk()
+    private void Move()
     {
-        rb.AddForce(movementPlatform * moveSpeed * Time.deltaTime, ForceMode2D.Impulse);
-    }
-    
-    private void Run()
-    {
-        //if (Input.GetKeyDown(KeyCode.LeftShift) && isJump == false && isMoving == true)
-        //{
-        //    currentVelocity *= mutiVelocity;
-        //    ani.SetBool("isRunning",true);
-            
-        //}
-        //if (Input.GetKeyUp(KeyCode.LeftShift))
-        //{
-        //    currentVelocity = maxVelocity;
-        //    ani.SetBool("isRunning", false);
-        //}
-        if (Input.GetKey(KeyCode.LeftShift))
+        horizontal = Input.GetAxis("Horizontal");
+        bool horizontalDown = horizontal != 0;
+        if (horizontalDown)
+            transform.eulerAngles = new Vector3(transform.eulerAngles.x, horizontal < 0 ? 180 : 0, transform.eulerAngles.z);
+        if (Input.GetKeyDown(KeyCode.LeftShift))
         {
-            if (isJump == false && isMoving == true)
-            {
-                currentVelocity *= mutiVelocity;
-                ani.SetBool("isRunning",true);
-            }
+            targetVelocity = new Vector2(horizontal * moveSpeed * moveSpeedRunning, rb.velocity.y);
+            Break;
         }
-
+        targetVelocity = new Vector2(horizontal * moveSpeed, rb.velocity.y);
+        
+        rb.velocity = Vector2.SmoothDamp(rb.velocity, targetVelocity, ref refVelocity, smoothTime);
+        
+        ani.SetFloat("Speed", horizontal, blendDamp, Time.deltaTime);
     }
     private void Jump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && onGround == true )
+        if (Input.GetKeyDown(KeyCode.Space) && onGround)
         {
-            rb.AddForce(transform.up * jumbForce, ForceMode2D.Force);
-            ani.SetBool("isJump", true);
-            isJump = true;
+            rb.velocity = new Vector2(rb.velocity.x, 0);
+            rb.AddForce(Vector2.up * jumpForce);
+            ani.SetBool("IsJump", true);
         }
         
     }
+    private void Run()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            ani.SetBool("IsRunning", true);
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.collider.CompareTag("Ground") || collision.gameObject.layer == 6)
-        {
-            onGround = true;
         }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            ani.SetBool("IsRunning", false);
+        }
+
     }
-    private void OnCollisionExit2D(Collision2D collision)
+
+    private void OnDrawGizmos()
     {
-        if (collision.collider.CompareTag("Ground") || collision.gameObject.layer == 6)
-        {
-            onGround = false;
-        }
+        Gizmos.color = onGround == true ? Color.blue : Color.red;
+        Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
+        //Gizmos.DrawLine(groundCheckPoint.position - new Vector3(0.5f, 0, 0), groundCheckPoint.position + new Vector3(0.5f, 0, 0));
+
     }
 }
