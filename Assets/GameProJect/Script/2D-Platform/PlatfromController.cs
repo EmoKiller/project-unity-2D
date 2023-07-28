@@ -1,19 +1,30 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 
 public class PlatfromController : MonoBehaviour
 {
     public float horizontal { get; private set; }
+    [Header("Status")]
+    [SerializeField] private float hp = 100f;
+    [SerializeField] private float mp = 100f;
+    [SerializeField] private float sp = 100f;
+    [SerializeField] private bool onGround = false;
+    [SerializeField] private bool isIdel => ani.GetFloat("Speed") == 0;
+    [SerializeField] private bool isWalk => ani.GetFloat("Speed") != 0 && ani.GetFloat("Speed") < 1.1f;
+    [SerializeField] private bool isJump = false;
+    [SerializeField] private bool isCrouch = false;
 
     [Header("Configuration Move")]
     
     [SerializeField] private float moveSpeed = 1.5f;
-    [SerializeField] private float moveSpeedRunning = 3f;
+    [SerializeField] private float moveSpeedRunning = 1f;
     [SerializeField] private float gravity = 1f;
-    [SerializeField] private float jumpForce = 5500f;
+    [SerializeField] private float jumpForce = 550f;
     [SerializeField] private float smoothTime = 0.01f;
     [SerializeField] private float blendDamp = 0.025f;
     
@@ -28,9 +39,8 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private Animator ani = null;
     [SerializeField] private Transform groundCheckPoint = null;
 
-    [Header("Status")]
-    [SerializeField] private bool onGround = false;
     
+
 
     private Vector2 refVelocity = Vector2.zero;
     private Vector2 targetVelocity = Vector2.zero;
@@ -49,38 +59,62 @@ public class PlatfromController : MonoBehaviour
         if (onGround)
         {
             ani.SetBool("IsJump", false);
+            isJump = false; 
+            Run();
+            Crouch();
         }
         else if(!onGround)
         {
             ani.SetBool("IsJump", true);
         }
         rb.AddForce(Vector2.down * gravity);
+        
         Move();
         Jump();
+        
     }
     
     private void Move()
     {
-        horizontal = Input.GetAxis("Horizontal");
+        horizontal = Input.GetAxis("Horizontal") * moveSpeedRunning;
+        SetAnimationMovement(MathF.Abs(horizontal));
         bool horizontalDown = horizontal != 0;
         if (horizontalDown)
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, horizontal < 0 ? 180 : 0, transform.eulerAngles.z);
         
         targetVelocity = new Vector2(horizontal * moveSpeed, rb.velocity.y);
-        
         rb.velocity = Vector2.SmoothDamp(rb.velocity, targetVelocity, ref refVelocity, smoothTime);
-        
-        ani.SetFloat("Speed", horizontal, blendDamp, Time.deltaTime);
+    }
+    private void SetAnimationMovement(float speed)
+    {
+        ani.SetFloat("Speed", speed, blendDamp, Time.deltaTime);
+    }
+    private void Run()
+    {
+        moveSpeedRunning = Input.GetKey(KeyCode.LeftShift) ? 2.5f : 1f ;
+
+    }
+    private void Crouch()
+    {
+        if (Input.GetKeyDown(KeyCode.C) && !isWalk)
+        {
+            Debug.Log(isCrouch);
+            isCrouch = !isCrouch;
+            Debug.Log(isCrouch);
+            ani.SetBool("Crouch", isCrouch);
+        }
     }
     private void Jump()
     {
         if (Input.GetKeyDown(KeyCode.Space) && onGround)
         {
+            isJump = true;
             rb.velocity = new Vector2(rb.velocity.x, 0);
             rb.AddForce(Vector2.up * jumpForce);
         }
         
     }
+    
 
     private void OnDrawGizmos()
     {
