@@ -16,13 +16,13 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private bool onGround = false;
     [SerializeField] private bool isIdel => ani.GetFloat("Speed") == 0;
     [SerializeField] private bool isWalk => ani.GetFloat("Speed") != 0 && ani.GetFloat("Speed") < 1.1f;
-    [SerializeField] private bool isJump = false;
+    [SerializeField] private bool isJump => ani.GetBool("IsJump");
     [SerializeField] private bool isCrouch = false;
 
     [Header("Configuration Move")]
     
     [SerializeField] private float moveSpeed = 1.5f;
-    [SerializeField] private float moveSpeedRunning = 1f;
+    [SerializeField] private float moveSpeedRunning;
     [SerializeField] private float gravity = 1f;
     [SerializeField] private float jumpForce = 550f;
     [SerializeField] private float smoothTime = 0.01f;
@@ -55,11 +55,14 @@ public class PlatfromController : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        if (horizontal == 0)
+        {
+            ani.SetFloat("Speed", 0);
+        }
         onGround = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayerMask) != null;
         if (onGround)
         {
             ani.SetBool("IsJump", false);
-            isJump = false; 
             Run();
             Crouch();
         }
@@ -91,12 +94,12 @@ public class PlatfromController : MonoBehaviour
     }
     private void Run()
     {
-        moveSpeedRunning = Input.GetKey(KeyCode.LeftShift) ? 2.5f : 1f ;
+        moveSpeedRunning = Input.GetKey(KeyCode.LeftShift) ? 2.5f : 1f;
 
     }
     private void Crouch()
     {
-        if (Input.GetKeyDown(KeyCode.C) && !isWalk)
+        if (Input.GetKey(KeyCode.C) && !isWalk)
         {
             Debug.Log(isCrouch);
             isCrouch = !isCrouch;
@@ -106,9 +109,8 @@ public class PlatfromController : MonoBehaviour
     }
     private void Jump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && onGround)
+        if (Input.GetKey(KeyCode.Space) && onGround)
         {
-            isJump = true;
             rb.velocity = new Vector2(rb.velocity.x, 0);
             rb.AddForce(Vector2.up * jumpForce);
         }
