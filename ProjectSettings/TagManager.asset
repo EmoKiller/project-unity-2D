@@ -10,6 +10,7 @@ TagManager:
   - GameManager
   - Character
   - UIManager
+  - TheWall
   layers:
   - Default
   - TransparentFX

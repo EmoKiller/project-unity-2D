@@ -13,6 +13,8 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private float hp = 100f;
     [SerializeField] private float mp = 100f;
     [SerializeField] private float sp = 100f;
+
+    [SerializeField] private bool theWall = false;
     [SerializeField] private bool onGround = false;
     [SerializeField] private bool onJump = false;
     [SerializeField] private bool isJump = false;
@@ -31,12 +33,15 @@ public class PlatfromController : MonoBehaviour
     
     [Header("Ground Check")]
     [SerializeField] private LayerMask groundLayerMask;
-    [SerializeField] private float groundCheckRadius = 0.2f;
-    
+    [SerializeField] private LayerMask theWallLayerMask;
+    [SerializeField] private float groundCheckRadius = 0.1f;
+    [SerializeField] private float theWallCheckRadius = 0.1f;
+
     [Header("Object Reference")]
     [SerializeField] private Rigidbody2D rb = null;
     [SerializeField] private Animator ani = null;
     [SerializeField] private Transform groundCheckPoint = null;
+    [SerializeField] private Transform theWallCheckPoint = null;
     [SerializeField] private CanvasUiManager uiManager = null;
 
     public float HP => hp;
@@ -53,33 +58,33 @@ public class PlatfromController : MonoBehaviour
     }
     private void Update()
     {
+        theWall = Physics2D.OverlapCircle(theWallCheckPoint.position, theWallCheckRadius, theWallLayerMask) != null;
         onGround = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayerMask) != null;
+        
         horizontal = Input.GetAxis("Horizontal") * moveSpeedRunning;
+        isRunning = Input.GetKey(KeyCode.LeftShift);
         isJump = Input.GetKey(KeyCode.Space);
         isCrouch = Input.GetKey(KeyCode.C);
-        isRunning = Input.GetKey(KeyCode.LeftShift);
         isWalk = horizontal != 0;
-        isIdel = !isWalk;
+        isIdel = !isWalk && !theWall;
 
-        if (isRunning)
-        {
+        if (isRunning && !onJump && !theWall)
             uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 0.05f);
-        }
+        
     }
     private void FixedUpdate()
     {
-        SetAnimation();
-        if (onGround)
+        rb.AddForce(Vector2.down * gravity);
+        if (onGround && !theWall)
         {
             Run();
-        }
-        else if (!onGround)
+        }else if (!onGround)
         {
 
         }
         Move();
         Jump();
-
+        SetAnimation();
     }
     private void SetAnimation()
     {
@@ -97,20 +102,23 @@ public class PlatfromController : MonoBehaviour
 
     private void Move()
     {
-        rb.AddForce(Vector2.down * gravity);
         SetAnimationMovement(MathF.Abs(horizontal));
         if (isWalk)
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, horizontal < 0 ? 180 : 0, transform.eulerAngles.z);
+        if (theWall)
+        {
+            horizontal = 0;
+        }
         targetVelocity = new Vector2(horizontal * moveSpeed, rb.velocity.y); 
         rb.velocity = Vector2.SmoothDamp(rb.velocity, targetVelocity, ref refVelocity, smoothTime);
     }
     private void Run()
-    {
-        moveSpeedRunning = Input.GetKey(KeyCode.LeftShift) ? 2.5f : 1f;
+    { 
+        moveSpeedRunning = Input.GetKey(KeyCode.LeftShift) && uiManager.SPSlider.value != 0f ? 2.5f : 1f;
     }
     private void Jump()
     {
-        if (isJump && onGround && !onJump)
+        if (isJump && onGround && !onJump )
         {
             onJump = true;
             rb.velocity = new Vector2(rb.velocity.x, 0);
@@ -123,6 +131,17 @@ public class PlatfromController : MonoBehaviour
         {
             onJump = false;
         }
+        //if (collision.collider.CompareTag("TheWall"))
+        //{
+        //    theWall = true;
+        //}
+    }
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        //if (collision.collider.CompareTag("TheWall"))
+        //{
+        //    theWall = false;
+        //}
     }
 
     private void OnDrawGizmos()
@@ -130,6 +149,7 @@ public class PlatfromController : MonoBehaviour
         Gizmos.color = onGround == true ? Color.blue : Color.red;
         Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
         //Gizmos.DrawLine(groundCheckPoint.position - new Vector3(0.5f, 0, 0), groundCheckPoint.position + new Vector3(0.5f, 0, 0));
-
+        Gizmos.color = theWall == true ? Color.blue : Color.red;
+        Gizmos.DrawWireSphere(theWallCheckPoint.position, theWallLayerMask);
     }
 }
