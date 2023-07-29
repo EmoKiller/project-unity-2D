@@ -9,102 +9,44 @@ using static System.Collections.Specialized.BitVector32;
 
 public class CanvasUiManager : Singleton<CanvasUiManager>
 {
-    private float Currenthealth = 10;
-    private float Currentmana = 10;
-    private float Currentstamina = 10;
+    [SerializeField] private PlatfromController player;
 
-    public float Stamina => Currentstamina;
+    [Header("Text")]
+    [SerializeField] private TextMeshProUGUI hpPoint;
+    [SerializeField] private TextMeshProUGUI mpPoint;
+    [SerializeField] private TextMeshProUGUI spPoint;
+    public TextMeshProUGUI HPPoint => hpPoint;
+    public TextMeshProUGUI MPPoint => mpPoint;
+    public TextMeshProUGUI SPPoint => spPoint;
 
-    public TextMeshProUGUI[] TextMeshProUGUIs;
-    
-    //public TextMeshProUGUI healthPoint;
-    //public TextMeshProUGUI manaPoint;
-    //public TextMeshProUGUI staminaPoint;
-
-    public Slider healthSlider;
-    public Slider manaSlider;
-    public Slider staminaSlider;
-
-
-    //private float smoothDecreaseDuration = 0.5f;
+    [Header("Slider")]
+    [SerializeField] private Slider healthSlider;
+    [SerializeField] private Slider manaSlider;
+    [SerializeField] private Slider staminaSlider;
+    public Slider HPSlider => healthSlider;
+    public Slider MPSlider => manaSlider;
+    public Slider SPSlider => staminaSlider;
     private void Awake()
     {
+        player = GameObject.FindWithTag("Player").GetComponent<PlatfromController>();
         DontDestroyOnLoad(gameObject);
     }
-    // Start is called before the first frame update
+
     void Start()
     {
-        UpdateInfomationtext();
-
-        healthSlider.maxValue = Currenthealth;
-        healthSlider.value = Currenthealth;
-
-        manaSlider.maxValue = Currentmana;
-        manaSlider.value = Currentmana;
-
-        staminaSlider.maxValue = Currentstamina;
-        staminaSlider.value = Currentstamina;
-        
-
+        healthSlider.maxValue = player.HP;
+        healthSlider.value = player.HP;
+        manaSlider.maxValue = player.MP;
+        manaSlider.value = player.MP;
+        staminaSlider.maxValue = player.SP;
+        staminaSlider.value = player.SP;
+        hpPoint.text = player.HP.ToString();
+        mpPoint.text = player.MP.ToString();
+        spPoint.text = player.SP.ToString();
     }
-
-    // Update is called once per frame
-    void Update()
+    public void Reduce(Slider slider, TextMeshProUGUI text,float reduce)
     {
-        
+        slider.value -= reduce;
+        text.text = ((int)slider.value).ToString();
     }
-    //private void ReducCurrent(float name, float number)
-    //{
-    //    name -= number;
-    //}
-    //public void ReduceSmooth(float number, Slider name , System.Action action)
-    //{
-    //    StartCoroutine(SmoothDecrease(number, name, action));
-    //}
-    //private IEnumerator SmoothDecrease(float number, Slider name, System.Action action)
-    //{
-    //    float numberPerTich = number / smoothDecreaseDuration;
-    //    float elapsedTime = 0f;
-    //    Currentstamina -= number;
-    //    //ReducCurrent();
-    //    while (elapsedTime < smoothDecreaseDuration)
-    //    {
-    //        float CrurentNumber = numberPerTich * Time.deltaTime;
-    //        name.value -= CrurentNumber;
-            
-    //        elapsedTime += Time.deltaTime;
-    //        UpdateInfomationtext();
-
-    //        if (name.value <= 0)
-    //        {
-    //            name.value = 0;
-    //            Currentstamina = -1;
-    //            if (action != null)
-    //            {
-    //                action();
-    //            }
-                    
-    //            break;
-    //        }
-    //        yield return null;
-    //    }
-    //}
-    //private void UpdateInfomationtext()
-    //{
-    //    healthPoint.text = Currenthealth.ToString();
-    //    manaPoint.text = Currentmana.ToString();
-    //    staminaPoint.text = Currentstamina.ToString();
-    //}
-    private void UpdateInfomationtext()
-    {
-        TextMeshProUGUIs[0].text = Currenthealth.ToString();
-        TextMeshProUGUIs[1].text = Currentmana.ToString();
-        TextMeshProUGUIs[2].text = Currentstamina.ToString();
-    }
-    //public void ReduceText(int reduce)
-    //{
-    //    Currentstamina -= reduce;
-    //    staminaPoint.text = Currentstamina.ToString();
-    //    staminaSlider.value = Currentstamina;
-    //}
 }

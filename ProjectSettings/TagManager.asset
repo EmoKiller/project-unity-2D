@@ -8,7 +8,8 @@ TagManager:
   - Enemy
   - Ground
   - GameManager
-  - character
+  - Character
+  - UIManager
   layers:
   - Default
   - TransparentFX
