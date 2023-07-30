@@ -123,7 +123,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &345560221
+--- !u!1 &157065073
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -131,7 +131,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 345560222}
+  - component: {fileID: 157065074}
   m_Layer: 0
   m_Name: CheckTheWall
   m_TagString: Untagged
@@ -139,15 +139,15 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &345560222
+--- !u!4 &157065074
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 345560221}
+  m_GameObject: {fileID: 157065073}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.19, y: 0.97, z: 0}
+  m_LocalPosition: {x: 0.22, y: 0.37, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -302,7 +302,7 @@ Transform:
   m_Children:
   - {fileID: 543450652111385918}
   - {fileID: 775839253}
-  - {fileID: 345560222}
+  - {fileID: 157065074}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -329,7 +329,7 @@ GameObject:
   - component: {fileID: 735036183}
   m_Layer: 3
   m_Name: GameObject
-  m_TagString: TheWall
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -461,11 +461,15 @@ MonoBehaviour:
   hp: 100
   mp: 100
   sp: 100
+  hpRegenerate: 0
+  mpRegenerate: 0
+  spRegenerate: 0
+  isEnemy: 0
   theWall: 0
+  isIdel: 0
   onGround: 0
   onJump: 0
   isJump: 0
-  isIdel: 0
   isCrouch: 0
   isWalk: 0
   isRunning: 0
@@ -477,16 +481,16 @@ MonoBehaviour:
   blendDamp: 0.025
   groundLayerMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 1032
   theWallLayerMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 1032
   groundCheckRadius: 0.1
   theWallCheckRadius: 0.1
   rb: {fileID: 0}
   ani: {fileID: 0}
   groundCheckPoint: {fileID: 775839253}
-  theWallCheckPoint: {fileID: 345560222}
+  theWallCheckPoint: {fileID: 157065074}
   uiManager: {fileID: 0}
 --- !u!70 &893596754
 CapsuleCollider2D:
@@ -615,8 +619,7 @@ GameObject:
   - component: {fileID: 1162782020}
   - component: {fileID: 1162782019}
   - component: {fileID: 1162782018}
-  - component: {fileID: 1162782021}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Square
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -708,35 +711,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1162782017}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.58, y: -1.83, z: 0}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: -1.58, y: -2.51, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &1162782021
-Rigidbody2D:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1162782017}
-  m_BodyType: 2
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1182653454
 GameObject:
   m_ObjectHideFlags: 0

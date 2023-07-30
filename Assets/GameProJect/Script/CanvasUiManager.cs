@@ -15,14 +15,15 @@ public class CanvasUiManager : Singleton<CanvasUiManager>
     [SerializeField] private TextMeshProUGUI hpPoint;
     [SerializeField] private TextMeshProUGUI mpPoint;
     [SerializeField] private TextMeshProUGUI spPoint;
-    public TextMeshProUGUI HPPoint => hpPoint;
-    public TextMeshProUGUI MPPoint => mpPoint;
-    public TextMeshProUGUI SPPoint => spPoint;
-
+    
     [Header("Slider")]
     [SerializeField] private Slider healthSlider;
     [SerializeField] private Slider manaSlider;
     [SerializeField] private Slider staminaSlider;
+
+    public TextMeshProUGUI HPPoint => hpPoint;
+    public TextMeshProUGUI MPPoint => mpPoint;
+    public TextMeshProUGUI SPPoint => spPoint;
     public Slider HPSlider => healthSlider;
     public Slider MPSlider => manaSlider;
     public Slider SPSlider => staminaSlider;
@@ -47,6 +48,11 @@ public class CanvasUiManager : Singleton<CanvasUiManager>
     public void Reduce(Slider slider, TextMeshProUGUI text,float reduce)
     {
         slider.value -= reduce;
+        text.text = ((int)slider.value).ToString();
+    }
+    public void Regenerate(Slider slider, TextMeshProUGUI text, float reduce)
+    {
+        slider.value += reduce;
         text.text = ((int)slider.value).ToString();
     }
 }

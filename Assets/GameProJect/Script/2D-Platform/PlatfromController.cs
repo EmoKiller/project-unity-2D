@@ -9,17 +9,23 @@ using UnityEngine.Experimental.GlobalIllumination;
 public class PlatfromController : MonoBehaviour
 {
     public float horizontal { get; private set; }
-    [Header("Status")]
+    [Header("State of health")]
     [SerializeField] private float hp = 100f;
     [SerializeField] private float mp = 100f;
     [SerializeField] private float sp = 100f;
 
+    [Header("Regenerate")]
+    [SerializeField] private bool hpRegenerate = false;
+    [SerializeField] private bool mpRegenerate = false;
+    [SerializeField] private bool spRegenerate = false;
+
+    [Header("Status")]
     [SerializeField] private bool isEnemy = false;
     [SerializeField] private bool theWall = false;
+    [SerializeField] private bool isIdel = false;
     [SerializeField] private bool onGround = false;
     [SerializeField] private bool onJump = false;
     [SerializeField] private bool isJump = false;
-    [SerializeField] private bool isIdel = false;
     [SerializeField] private bool isCrouch = false;
     [SerializeField] private bool isWalk = false;
     [SerializeField] private bool isRunning = false;
@@ -69,13 +75,22 @@ public class PlatfromController : MonoBehaviour
         isCrouch = Input.GetKey(KeyCode.C);
         isWalk = horizontal != 0;
         isIdel = !isWalk && !theWall;
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !onJump && !theWall)
         {
-            uiManager.Reduce(uiManager.SPSlider, uiManager.SPPoint, 5f);
+            uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 5f);
+        }
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            WaitRegenerate();
         }
         if (isRunning && !onJump && !theWall)
             uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 0.05f);
         
+    }
+    IEnumerator WaitRegenerate()
+    {
+        yield return new WaitForSeconds(3f);
+        uiManager.Regenerate(uiManager.SPSlider, uiManager.SPPoint, 0.05f);
     }
     private void FixedUpdate()
     {
