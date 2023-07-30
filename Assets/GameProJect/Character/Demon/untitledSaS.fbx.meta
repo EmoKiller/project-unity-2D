@@ -1022,21 +1022,21 @@ ModelImporter:
       name: Human|sword and shield jump (1)
       takeName: Human|sword and shield jump (2)
       internalID: 8616363490893775786
-      firstFrame: 0
+      firstFrame: 7.9000006
       lastFrame: 29
       wrapMode: 0
       orientationOffsetY: 0
-      level: 0
+      level: 0.33
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 1
-      loopBlendPositionY: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
       loopBlendPositionXZ: 0
       keepOriginalOrientation: 0
-      keepOriginalPositionY: 0
+      keepOriginalPositionY: 1
       keepOriginalPositionXZ: 0
       heightFromFeet: 0
       mirror: 0

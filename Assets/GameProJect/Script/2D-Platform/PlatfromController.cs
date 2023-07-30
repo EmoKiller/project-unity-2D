@@ -14,6 +14,7 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private float mp = 100f;
     [SerializeField] private float sp = 100f;
 
+    [SerializeField] private bool isEnemy = false;
     [SerializeField] private bool theWall = false;
     [SerializeField] private bool onGround = false;
     [SerializeField] private bool onJump = false;
@@ -59,6 +60,7 @@ public class PlatfromController : MonoBehaviour
     private void Update()
     {
         theWall = Physics2D.OverlapCircle(theWallCheckPoint.position, theWallCheckRadius, theWallLayerMask) != null;
+        isEnemy = Physics2D.OverlapCircle(theWallCheckPoint.position, theWallCheckRadius, theWallLayerMask) != null;
         onGround = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayerMask) != null;
         
         horizontal = Input.GetAxis("Horizontal") * moveSpeedRunning;
@@ -67,7 +69,10 @@ public class PlatfromController : MonoBehaviour
         isCrouch = Input.GetKey(KeyCode.C);
         isWalk = horizontal != 0;
         isIdel = !isWalk && !theWall;
-
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            uiManager.Reduce(uiManager.SPSlider, uiManager.SPPoint, 5f);
+        }
         if (isRunning && !onJump && !theWall)
             uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 0.05f);
         
@@ -105,7 +110,7 @@ public class PlatfromController : MonoBehaviour
         SetAnimationMovement(MathF.Abs(horizontal));
         if (isWalk)
             transform.eulerAngles = new Vector3(transform.eulerAngles.x, horizontal < 0 ? 180 : 0, transform.eulerAngles.z);
-        if (theWall)
+        if (theWall || isEnemy)
         {
             horizontal = 0;
         }
@@ -127,7 +132,7 @@ public class PlatfromController : MonoBehaviour
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.collider.CompareTag("Ground"))
+        if (collision.collider.CompareTag("Ground") || collision.gameObject.layer == 10)
         {
             onJump = false;
         }
@@ -150,6 +155,6 @@ public class PlatfromController : MonoBehaviour
         Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
         //Gizmos.DrawLine(groundCheckPoint.position - new Vector3(0.5f, 0, 0), groundCheckPoint.position + new Vector3(0.5f, 0, 0));
         Gizmos.color = theWall == true ? Color.blue : Color.red;
-        Gizmos.DrawWireSphere(theWallCheckPoint.position, theWallLayerMask);
+        Gizmos.DrawWireSphere(theWallCheckPoint.position, theWallCheckRadius);
     }
 }
