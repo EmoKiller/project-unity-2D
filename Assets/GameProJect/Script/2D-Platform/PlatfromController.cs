@@ -92,7 +92,7 @@ public class PlatfromController : MonoBehaviour
     }
     IEnumerator WaitRegenerate()
     {
-        
+        yield return new WaitForSeconds(3f);
         while (uiManager.SPSlider.value < uiManager.SPSlider.maxValue && !isRunning)
         {
             yield return new WaitForSeconds(3f);
