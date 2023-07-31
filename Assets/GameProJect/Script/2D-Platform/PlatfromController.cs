@@ -18,8 +18,10 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private bool hpRegenerate = false;
     [SerializeField] private bool mpRegenerate = false;
     [SerializeField] private bool spRegenerate = false;
+    [SerializeField] private float countDown = 3f;
 
     [Header("Status")]
+    [SerializeField] private bool alive = false;
     [SerializeField] private bool isEnemy = false;
     [SerializeField] private bool theWall = false;
     [SerializeField] private bool isIdel = false;
@@ -29,6 +31,8 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private bool isCrouch = false;
     [SerializeField] private bool isWalk = false;
     [SerializeField] private bool isRunning = false;
+    [SerializeField] private bool isKick = false;
+    [SerializeField] private bool isHoldWeapon = false;
 
     [Header("Configuration Move")]
     [SerializeField] private float moveSpeed = 1.5f;
@@ -54,6 +58,7 @@ public class PlatfromController : MonoBehaviour
     public float HP => hp;
     public float MP => mp;
     public float SP => sp;
+    public bool Alive => alive;
 
     private Vector2 refVelocity = Vector2.zero;
     private Vector2 targetVelocity = Vector2.zero;
@@ -62,13 +67,10 @@ public class PlatfromController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         ani = GameObject.FindWithTag("Character").GetComponent<Animator>();
         uiManager = GameObject.FindWithTag("UIManager").GetComponent<CanvasUiManager>();
+        alive = true;
     }
     private void Update()
     {
-        theWall = Physics2D.OverlapCircle(theWallCheckPoint.position, theWallCheckRadius, theWallLayerMask) != null;
-        isEnemy = Physics2D.OverlapCircle(theWallCheckPoint.position, theWallCheckRadius, theWallLayerMask) != null;
-        onGround = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayerMask) != null;
-        
         horizontal = Input.GetAxis("Horizontal") * moveSpeedRunning;
         isRunning = Input.GetKey(KeyCode.LeftShift);
         isJump = Input.GetKey(KeyCode.Space);
@@ -81,19 +83,35 @@ public class PlatfromController : MonoBehaviour
         }
         if (Input.GetKeyUp(KeyCode.LeftShift))
         {
+            Debug.Log("up");
             WaitRegenerate();
         }
         if (isRunning && !onJump && !theWall)
             uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 0.05f);
+        isKick = Input.GetKey(KeyCode.F);
         
     }
     IEnumerator WaitRegenerate()
     {
+        
         yield return new WaitForSeconds(3f);
-        uiManager.Regenerate(uiManager.SPSlider, uiManager.SPPoint, 0.05f);
+        while (uiManager.SPSlider.value < uiManager.SPSlider.maxValue && !isRunning)
+        {
+            uiManager.Regenerate(uiManager.SPSlider, uiManager.SPPoint, 0.05f);
+            yield return new WaitForSeconds(1f);
+        }
+
+
     }
     private void FixedUpdate()
     {
+        if (!alive)
+            return;
+
+        theWall = Physics2D.OverlapCircle(theWallCheckPoint.position, theWallCheckRadius, theWallLayerMask) != null;
+        isEnemy = Physics2D.OverlapCircle(theWallCheckPoint.position, theWallCheckRadius, theWallLayerMask) != null;
+        onGround = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayerMask) != null;
+
         rb.AddForce(Vector2.down * gravity);
         if (onGround && !theWall)
         {
@@ -114,6 +132,8 @@ public class PlatfromController : MonoBehaviour
         }
         ani.SetBool("IsJump", onJump);
         ani.SetBool("Crouch", isCrouch);
+        ani.SetBool("Kick", isKick);
+        
     }
     private void SetAnimationMovement(float speed)
     {
