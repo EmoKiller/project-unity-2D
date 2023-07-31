@@ -77,16 +77,15 @@ public class PlatfromController : MonoBehaviour
         isCrouch = Input.GetKey(KeyCode.C);
         isWalk = horizontal != 0;
         isIdel = !isWalk && !theWall;
-        if (Input.GetKeyDown(KeyCode.LeftShift) && !onJump && !theWall)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !onJump && !theWall && !isIdel)
         {
             uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 5f);
         }
-        if (Input.GetKeyUp(KeyCode.LeftShift))
+        if (Input.GetKeyUp(KeyCode.LeftShift) && isRunning)
         {
-            Debug.Log("up");
-            WaitRegenerate();
+            StartCoroutine(WaitRegenerate());
         }
-        if (isRunning && !onJump && !theWall)
+        if (isRunning && !onJump && !theWall && !isIdel)
             uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 0.05f);
         isKick = Input.GetKey(KeyCode.F);
         
@@ -94,11 +93,9 @@ public class PlatfromController : MonoBehaviour
     IEnumerator WaitRegenerate()
     {
         
-        yield return new WaitForSeconds(3f);
         while (uiManager.SPSlider.value < uiManager.SPSlider.maxValue && !isRunning)
         {
-            uiManager.Regenerate(uiManager.SPSlider, uiManager.SPPoint, 0.05f);
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(3f);
         }
 
 
