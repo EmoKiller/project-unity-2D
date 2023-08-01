@@ -10,6 +10,9 @@ public class PlatfromController : MonoBehaviour
 {
     public float horizontal { get; private set; }
     [Header("State of health")]
+    [SerializeField] private int level = 1;
+    [SerializeField] private float expUp = 1f;
+    [SerializeField] private float expCurrent = 0f;
     [SerializeField] private float hp = 100f;
     [SerializeField] private float mp = 100f;
     [SerializeField] private float sp = 100f;
@@ -42,7 +45,7 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private float jumpForce = 550f;
     [SerializeField] private float smoothTime = 0.01f;
     [SerializeField] private float blendDamp = 0.025f;
-    
+
     [Header("Ground Check")]
     [SerializeField] private LayerMask groundLayerMask;
     [SerializeField] private LayerMask theWallLayerMask;
@@ -82,7 +85,7 @@ public class PlatfromController : MonoBehaviour
         isIdel = !isWalk && !theWall;
         if (Input.GetKeyDown(KeyCode.LeftShift) && !onJump && !theWall && !isIdel)
         {
-            uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 5f);
+            uiManager.Reduce(uiManager.SPSlider, uiManager.SPPoint, 5f);
             spRegenerate = false;
         }
         if (Input.GetKeyUp(KeyCode.LeftShift) && !spRegenerate)
@@ -90,7 +93,7 @@ public class PlatfromController : MonoBehaviour
             reload = true;
         }
         if (isRunning && !onJump && !theWall && !isIdel)
-            uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 0.05f);
+            uiManager.Reduce(uiManager.SPSlider, uiManager.SPPoint, 0.05f);
         isKick = Input.GetKey(KeyCode.F);
 
         if (reload)
@@ -105,16 +108,16 @@ public class PlatfromController : MonoBehaviour
     {
         spRegenerate = true;
         countDown = 0;
-        while (countDown < startRegenerate )
+        while (countDown < startRegenerate)
         {
-            if (isRunning|| !spRegenerate)
+            if (isRunning || !spRegenerate)
                 break;
             yield return new WaitForSeconds(1f);
             countDown++;
         }
         while (uiManager.SPSlider.value < uiManager.SPSlider.maxValue && !isRunning)
         {
-            if (isRunning|| !spRegenerate)
+            if (isRunning || !spRegenerate)
                 break;
             yield return new WaitForSeconds(1f);
             uiManager.Regenerate(uiManager.SPSlider, uiManager.SPPoint, 5f);
@@ -135,7 +138,8 @@ public class PlatfromController : MonoBehaviour
         if (onGround && !theWall)
         {
             Run();
-        }else if (!onGround)
+        }
+        else if (!onGround)
         {
 
         }
@@ -152,7 +156,7 @@ public class PlatfromController : MonoBehaviour
         ani.SetBool("IsJump", onJump);
         ani.SetBool("Crouch", isCrouch);
         ani.SetBool("Kick", isKick);
-        
+
     }
     private void SetAnimationMovement(float speed)
     {
@@ -168,16 +172,16 @@ public class PlatfromController : MonoBehaviour
         {
             horizontal = 0;
         }
-        targetVelocity = new Vector2(horizontal * moveSpeed, rb.velocity.y); 
+        targetVelocity = new Vector2(horizontal * moveSpeed, rb.velocity.y);
         rb.velocity = Vector2.SmoothDamp(rb.velocity, targetVelocity, ref refVelocity, smoothTime);
     }
     private void Run()
-    { 
+    {
         moveSpeedRunning = Input.GetKey(KeyCode.LeftShift) && uiManager.SPSlider.value != 0f ? 2.5f : 1f;
     }
     private void Jump()
     {
-        if (isJump && onGround && !onJump )
+        if (isJump && onGround && !onJump)
         {
             onJump = true;
             rb.velocity = new Vector2(rb.velocity.x, 0);
