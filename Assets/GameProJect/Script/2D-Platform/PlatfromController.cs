@@ -18,7 +18,8 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private bool hpRegenerate = false;
     [SerializeField] private bool mpRegenerate = false;
     [SerializeField] private bool spRegenerate = false;
-    [SerializeField] private float countDown = 3f;
+    [SerializeField] private float countDown = 0f;
+    [SerializeField] private float startRegenerate = 3f;
 
     [Header("Status")]
     [SerializeField] private bool alive = false;
@@ -55,6 +56,8 @@ public class PlatfromController : MonoBehaviour
     [SerializeField] private Transform theWallCheckPoint = null;
     [SerializeField] private CanvasUiManager uiManager = null;
 
+    bool reload;
+
     public float HP => hp;
     public float MP => mp;
     public float SP => sp;
@@ -80,22 +83,41 @@ public class PlatfromController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftShift) && !onJump && !theWall && !isIdel)
         {
             uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 5f);
+            spRegenerate = false;
         }
-        if (Input.GetKeyUp(KeyCode.LeftShift) && isRunning)
+        if (Input.GetKeyUp(KeyCode.LeftShift) && !spRegenerate)
         {
-            StartCoroutine(WaitRegenerate());
+            reload = true;
         }
         if (isRunning && !onJump && !theWall && !isIdel)
             uiManager.Reduce(uiManager.SPSlider,uiManager.SPPoint, 0.05f);
         isKick = Input.GetKey(KeyCode.F);
-        
+
+        if (reload)
+        {
+            reload = false;
+            StartCoroutine(WaitRegenerate());
+        }
+
+
     }
     IEnumerator WaitRegenerate()
     {
-        yield return new WaitForSeconds(3f);
+        spRegenerate = true;
+        countDown = 0;
+        while (countDown < startRegenerate )
+        {
+            if (isRunning|| !spRegenerate)
+                break;
+            yield return new WaitForSeconds(1f);
+            countDown++;
+        }
         while (uiManager.SPSlider.value < uiManager.SPSlider.maxValue && !isRunning)
         {
-            yield return new WaitForSeconds(3f);
+            if (isRunning|| !spRegenerate)
+                break;
+            yield return new WaitForSeconds(1f);
+            uiManager.Regenerate(uiManager.SPSlider, uiManager.SPPoint, 5f);
         }
 
 
